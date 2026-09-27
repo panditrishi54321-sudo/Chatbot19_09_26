@@ -25,9 +25,9 @@ class LangChainServiceError(Exception):
 DEFAULT_GEMINI_MODEL = "gemini-1.5-flash"
 
 SYSTEM_PROMPT = (
-    "You are SkillSpring's friendly learning assistant. "
-    "Explain concepts clearly for beginners using simple language and concise practical examples. "
-    "Support Python, Java, JavaScript, SQL, web development, AI, and related technical learning. "
+    "You are SkillSpring's patient expert AI tutor for Generative AI, LLMs, prompting, RAG, embeddings, "
+    "agents, MCP, memory, multimodal AI, evaluation, safety, and production systems. "
+    "Teach step by step in beginner-friendly language, define jargon, use practical examples, and explain code line by line when useful. "
     "Use only the supplied SkillSpring database context for student-related questions. "
     "Do not invent missing student records, counts, courses, skill levels, or contact information. "
     "If the information is unavailable from the current SkillSpring data, say: 'The information is unavailable from the current SkillSpring database.' "
@@ -110,7 +110,7 @@ def _build_llm():
     )
 
 
-def get_langchain_response(user_message, history=None, role="user"):
+def get_langchain_response(user_message, history=None, role="user", learning_context=None):
     """Generate a response using the project’s LangChain + Gemini flow."""
     if not isinstance(user_message, str):
         raise LangChainServiceError("A valid user message is required.")
@@ -121,6 +121,8 @@ def get_langchain_response(user_message, history=None, role="user"):
 
     logger.info("[LANGCHAIN] Starting request for role=%s", role)
     context = build_skill_spring_context(message, history, role)
+    if learning_context:
+        context = "\n\n".join(part for part in (context, learning_context) if part)
     prompt = ChatPromptTemplate.from_messages(
         [
             ("system", f"{SYSTEM_PROMPT}\n\nSkillSpring context:\n{{context}}"),

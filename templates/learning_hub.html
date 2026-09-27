@@ -5,6 +5,12 @@
   id="learning-hub"
   data-csrf-token="{{ csrf_token }}"
 >
+  <p
+    class="hub-global-status"
+    id="hub-global-status"
+    role="status"
+    aria-live="polite"
+  ></p>
   <header class="hub-hero">
     <div class="hub-hero-copy">
       <p class="eyebrow">SkillSpring / Learning Journey</p>
@@ -259,6 +265,7 @@
       </p>
     </div>
     <div class="hub-tutor-modes">
+      <button type="button" data-tutor-mode="any">Ask anything about GenAI</button>
       <button type="button" data-tutor-mode="teach">Teach Me</button>
       <button type="button" data-tutor-mode="code">Show Me Code</button>
       <button type="button" data-tutor-mode="simple">Explain Simply</button>

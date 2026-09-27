@@ -703,6 +703,11 @@ def learning_hub_chapters():
 	return jsonify(chapters=CHAPTERS)
 
 
+@app.route("/api/learning-hub/labs")
+def learning_hub_labs():
+	return jsonify(labs=PRACTICE_LABS)
+
+
 @app.route("/api/learning-hub/chapters/<slug>")
 def learning_hub_chapter(slug):
 	chapter = get_chapter(slug)
@@ -832,6 +837,7 @@ def chat():
 	data = request.get_json(silent=True)
 	message = data.get("message", "").strip() if isinstance(data, dict) else ""
 	history = data.get("history", []) if isinstance(data, dict) else []
+	chapter_slug = data.get("chapter_slug", "") if isinstance(data, dict) else ""
 	role = (session.get("role") or "user").lower()
 	if role not in {"admin", "user"}:
 		role = "user"
@@ -849,7 +855,13 @@ def chat():
 
 	try:
 		app.logger.info("[LANGCHAIN] Starting request")
-		reply = get_langchain_response(message, history, role=role)
+		learning_context = build_chapter_tutor_context(chapter_slug, message)
+		reply = get_langchain_response(
+			message,
+			history,
+			role=role,
+			learning_context=learning_context,
+		)
 		app.logger.info("[LANGCHAIN] Response received")
 		app.logger.info("[CHAT] Response returned")
 		return jsonify(success=True, reply=reply), 200
