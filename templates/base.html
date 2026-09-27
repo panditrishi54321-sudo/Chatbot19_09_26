@@ -3,7 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% block title %}SkillSpring EdTech{% endblock %}</title>
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="{{ url_for('static', filename='images/rptechx-favicon.svg', v='1') }}"
+    />
+    <title>{% block title %}RPTechX | SkillSpring EdTech{% endblock %}</title>
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='css/style.css') }}"
@@ -12,13 +17,14 @@
   <body>
     <header class="site-header">
       <nav class="navbar container" aria-label="Main navigation">
-        <a
-          class="brand"
-          href="{{ url_for('home') }}"
-          aria-label="SkillSpring home"
-        >
-          <span class="brand-mark" aria-hidden="true">S</span>
-          <span>SkillSpring</span>
+        <a class="brand" href="{{ url_for('home') }}" aria-label="RPTechX home">
+          <img
+            class="brand-image"
+            src="{{ url_for('static', filename='images/rptechx-logo.svg') }}"
+            alt="RPTechX"
+            width="290"
+            height="58"
+          />
         </a>
         <button
           class="nav-toggle"

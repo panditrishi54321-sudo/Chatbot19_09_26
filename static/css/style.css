@@ -1086,6 +1086,12 @@ p {
   font-size: 1.42rem;
 }
 
+.brand-image {
+  display: block;
+  width: 174px;
+  height: 35px;
+}
+
 .brand-mark,
 .form-intro-mark,
 .stat-mark {

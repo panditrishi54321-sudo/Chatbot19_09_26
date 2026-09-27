@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 290 58" role="img" aria-label="RPTechX">
+  <defs>
+    <linearGradient id="cyan" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4de2f4" />
+      <stop offset="1" stop-color="#168bd4" />
+    </linearGradient>
+  </defs>
+  <rect x="2" y="3" width="52" height="52" rx="14" fill="#10243a" />
+  <path d="M12 13h17c9 0 14 4 14 12 0 5-3 9-8 10l9 12H31l-8-11h-2v11H12V13Zm9 9v7h8c3 0 5-1 5-4s-2-3-5-3h-8Z" fill="#f4fbff" />
+  <path d="M36 37h12v7H36z" fill="url(#cyan)" />
+  <text x="67" y="40" fill="#10243a" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="800">RPTech</text>
+  <text x="173" y="40" fill="#168bd4" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="800">X</text>
+</svg>
