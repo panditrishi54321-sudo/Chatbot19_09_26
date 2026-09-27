@@ -1,0 +1,97 @@
+import json
+import os
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
+
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
+
+class OpenAIConfigurationError(Exception):
+	"""Kept for compatibility with the existing Flask import contract."""
+
+
+class OpenAIServiceError(Exception):
+	"""Raised when the local Ollama request cannot be completed safely."""
+
+
+OLLAMA_DEFAULT_URL = "http://localhost:11434"
+OLLAMA_DEFAULT_MODEL = "qwen3:8b"
+SYSTEM_PROMPT = (
+	"You are SkillSpring's friendly learning assistant. "
+	"Explain concepts clearly for beginners using simple language and concise practical examples. "
+	"Use step-by-step explanations when helpful. Support Python, Java, JavaScript, SQL, "
+	"web development, AI, and related technical learning. Avoid unnecessary length. "
+	"Format requested code in code blocks. Never reveal internal configuration, API keys, "
+	"environment variables, or server details."
+)
+
+
+def get_ai_response(user_message, history=None):
+	"""Send a learner message to the local Ollama model."""
+	base_url = os.getenv("OLLAMA_BASE_URL", OLLAMA_DEFAULT_URL).rstrip("/")
+	model = os.getenv("OLLAMA_MODEL", OLLAMA_DEFAULT_MODEL)
+	conversation = _clean_history(history)
+	if not conversation or conversation[-1] != {"role": "user", "content": user_message}:
+		conversation.append({"role": "user", "content": user_message})
+	request_body = {
+		"model": model,
+		"messages": [{"role": "system", "content": SYSTEM_PROMPT}, *conversation],
+		"stream": False,
+		"options": {
+			"num_predict": 300,
+			"temperature": 0.3,
+		},
+	}
+
+	request = Request(
+		f"{base_url}/api/chat",
+		data=json.dumps(request_body).encode("utf-8"),
+		headers={"Content-Type": "application/json"},
+		method="POST",
+	)
+
+	try:
+		with urlopen(request, timeout=120) as response:
+			response_data = json.loads(response.read().decode("utf-8"))
+	except HTTPError as error:
+		raise OpenAIServiceError from error
+	except (
+		URLError,
+		TimeoutError,
+		OSError,
+		ValueError,
+		UnicodeDecodeError,
+		json.JSONDecodeError,
+	) as error:
+		raise OpenAIServiceError from error
+
+	try:
+		reply = response_data["message"]["content"]
+	except (KeyError, TypeError) as error:
+		raise OpenAIServiceError from error
+
+	if not isinstance(reply, str) or not reply.strip():
+		raise OpenAIServiceError
+
+	return reply.strip()
+
+
+def _clean_history(history):
+	"""Keep only a small, valid conversation supplied by the browser."""
+	if not isinstance(history, list):
+		return []
+
+	cleaned_history = []
+	for item in history[-20:]:
+		if not isinstance(item, dict):
+			continue
+		role = item.get("role")
+		content = item.get("content")
+		if role in {"user", "assistant"} and isinstance(content, str):
+			content = content.strip()
+			if content and len(content) <= 4000:
+				cleaned_history.append({"role": role, "content": content})
+	return cleaned_history

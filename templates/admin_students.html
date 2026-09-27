@@ -1,0 +1,156 @@
+{% extends "base.html" %} {% block title %}Admin Students | SkillSpring{%
+endblock %} {% block content %}
+<section class="page-heading container">
+  <p class="eyebrow">Admin management / 02</p>
+  <h1>Student records<span class="title-dot">.</span></h1>
+  <p>Complete student information for administrators only.</p>
+</section>
+
+<section class="container management-panel">
+  <div class="admin-toolbar">
+    <form
+      method="get"
+      action="{{ url_for('admin_students') }}"
+      class="filter-form"
+    >
+      <div class="filter-field search-field">
+        <label for="student-search">Search by name</label>
+        <input
+          id="student-search"
+          type="text"
+          name="search"
+          value="{{ search_value or '' }}"
+          placeholder="Search students..."
+        />
+      </div>
+
+      <div class="filter-field">
+        <label for="course-filter">Course</label>
+        <select id="course-filter" name="course">
+          <option value="">All courses</option>
+          {% for course in courses %}
+          <option value="{{ course }}" {% if selected_course == course %}selected{% endif %}>
+            {{ course }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label for="skill-filter">Skill level</label>
+        <select id="skill-filter" name="skill_level">
+          <option value="">All levels</option>
+          {% for skill in skill_levels %}
+          <option value="{{ skill }}" {% if selected_skill_level == skill %}selected{% endif %}>
+            {{ skill }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="filter-actions">
+        <button type="submit" class="button button-primary">Apply</button>
+        <a
+          class="button button-secondary"
+          href="{{ url_for('admin_students') }}"
+          >Reset</a
+        >
+      </div>
+    </form>
+  </div>
+
+  <div class="data-summary">
+    <div>
+      <span class="summary-label">Admin access</span>
+      <strong>{% if show_deleted %}Archived records{% else %}Complete records{% endif %}</strong>
+    </div>
+    <div class="learner-count">
+      <strong>{{ students|length }}</strong><span>total learners</span>
+    </div>
+    <div class="action-stack compact-actions">
+      <a class="button button-primary" href="{{ url_for('admin_export') }}"
+        >Download Excel</a
+      >
+      {% if show_deleted %}
+      <a class="button button-secondary" href="{{ url_for('admin_students') }}"
+        >View active</a
+      >
+      {% else %}
+      <a class="button button-secondary" href="{{ url_for('admin_students', show_deleted='true') }}"
+        >View archived</a
+      >
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <table class="student-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Course</th>
+          <th>Skill Level</th>
+          <th>Created At</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for student in students %}
+        <tr>
+          <td>{{ student["id"] }}</td>
+          <td>{{ student["name"] }}</td>
+          <td>{{ student["email"] }}</td>
+          <td>{{ student["phone"] or "-" }}</td>
+          <td>{{ student["course"] }}</td>
+          <td>{{ student["skill_level"] }}</td>
+          <td>{{ student["created_at"] }}</td>
+          <td>
+            <div class="action-buttons">
+              {% if show_deleted %}
+              <form
+                method="post"
+                action="{{ url_for('admin_restore_student', student_id=student['id']) }}"
+              >
+                <input type="hidden" name="csrf_token" value="{{ session.get('csrf_token', '') }}" />
+                <button type="submit" class="button button-secondary small-button">
+                  Restore
+                </button>
+              </form>
+              {% else %}
+              <a
+                class="button button-secondary small-button"
+                href="{{ url_for('admin_edit_student', student_id=student['id']) }}"
+                >Edit</a
+              >
+              <form
+                method="post"
+                action="{{ url_for('admin_delete_student', student_id=student['id']) }}"
+                onsubmit="return confirm('Are you sure you want to delete {{ student['name']|replace("'", "\\'") }}? This action cannot be undone.');"
+              >
+                <input type="hidden" name="csrf_token" value="{{ session.get('csrf_token', '') }}" />
+                <button type="submit" class="button button-danger small-button">
+                  Delete
+                </button>
+              </form>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="8">
+            <div class="empty-state compact-empty">
+              <h2>No students match this filter.</h2>
+              <p>Try widening your search or clearing the filters.</p>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

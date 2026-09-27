@@ -1,0 +1,191 @@
+document.addEventListener("DOMContentLoaded", () => {
+  const launcher = document.querySelector("#chat-launcher");
+  const panel = document.querySelector("#chat-panel");
+  const closeButton = document.querySelector("#chat-close");
+  const clearButton = document.querySelector("#chat-clear");
+  const form = document.querySelector("#chat-form");
+  const input = document.querySelector("#chat-input");
+  const messages = document.querySelector("#chat-messages");
+  const sendButton = document.querySelector(".chat-send");
+
+  if (
+    !launcher ||
+    !panel ||
+    !closeButton ||
+    !clearButton ||
+    !form ||
+    !input ||
+    !messages ||
+    !sendButton
+  ) {
+    return;
+  }
+
+  let conversationHistory = [];
+
+  const scrollToLatest = () => {
+    messages.scrollTop = messages.scrollHeight;
+  };
+
+  const addMessage = (text, messageType) => {
+    const message = document.createElement("div");
+    message.className = `chat-message ${messageType}-message`;
+    if (messageType === "assistant") {
+      message.innerHTML = formatAssistantResponse(text);
+    } else {
+      message.textContent = text;
+    }
+    messages.appendChild(message);
+    scrollToLatest();
+    return message;
+  };
+
+  const escapeHtml = (text) =>
+    text.replace(/[&<>'"]/g, (character) => {
+      const entities = {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "'": "&#39;",
+        '"': "&quot;",
+      };
+      return entities[character];
+    });
+
+  const formatAssistantResponse = (text) => {
+    const escapedText = escapeHtml(text);
+    const codeBlocks = [];
+
+    const textWithPlaceholders = escapedText.replace(
+      /```([^\n]*)\n?([\s\S]*?)```/g,
+      (_match, language, code) => {
+        const className = language.trim()
+          ? ` class="language-${language.trim()}"`
+          : "";
+
+        codeBlocks.push(
+          `<pre><code${className}>${code.trim()}</code></pre>`
+        );
+
+        return `@@CODEBLOCK_${codeBlocks.length - 1}__`;
+      },
+    );
+
+    const formatInlineMarkdown = (value) => {
+      return value
+        .replace(/^###\s+(.+)$/gm, "<h3>$1</h3>")
+        .replace(/^##\s+(.+)$/gm, "<h2>$1</h2>")
+        .replace(/^#\s+(.+)$/gm, "<h1>$1</h1>")
+        .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+        .replace(/__(.+?)__/g, "<strong>$1</strong>")
+        .replace(/\*(.+?)\*/g, "<em>$1</em>")
+        .replace(/_(.+?)_/g, "<em>$1</em>");
+    };
+
+    return textWithPlaceholders
+      .split(/\n{2,}/)
+      .map((paragraph) => {
+        const trimmedParagraph = paragraph.trim();
+
+        if (/^@@CODEBLOCK_\d+__$/.test(trimmedParagraph)) {
+          return codeBlocks[Number(trimmedParagraph.match(/\d+/)[0])];
+        }
+
+        const lines = trimmedParagraph.split("\n");
+
+        if (lines.every((line) => /^\s*(?:[-*]|\d+\.)\s+/.test(line))) {
+          const ordered = /^\s*\d+\./.test(lines[0]);
+
+          const listItems = lines
+            .map((line) =>
+              line.replace(/^\s*(?:[-*]|\d+\.)\s+/, "")
+            )
+            .map((line) => `<li>${formatInlineMarkdown(line)}</li>`)
+            .join("");
+
+          return `<${ordered ? "ol" : "ul"}>${listItems}</${ordered ? "ol" : "ul"}>`;
+        }
+
+        return `<p>${formatInlineMarkdown(
+          trimmedParagraph.replace(/\n/g, "<br>")
+        )}</p>`;
+      })
+      .join("");
+  };
+
+  const clearChat = () => {
+    conversationHistory = [];
+    messages.innerHTML =
+      '<div class="chat-message assistant-message">Hi! Ask me anything about your learning journey.</div>';
+    input.value = "";
+    input.focus();
+    scrollToLatest();
+  };
+
+  const setPanelVisibility = (isOpen) => {
+    panel.hidden = !isOpen;
+    launcher.setAttribute("aria-expanded", String(isOpen));
+    if (isOpen) {
+      input.focus();
+      scrollToLatest();
+    }
+  };
+
+  launcher.addEventListener("click", () => setPanelVisibility(true));
+  closeButton.addEventListener("click", () => setPanelVisibility(false));
+  clearButton.addEventListener("click", clearChat);
+
+  input.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      form.requestSubmit();
+    }
+  });
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const message = input.value.trim();
+
+    if (!message || sendButton.disabled) {
+      return;
+    }
+
+    addMessage(message, "user");
+    conversationHistory.push({ role: "user", content: message });
+    input.value = "";
+    sendButton.disabled = true;
+    sendButton.textContent = "Thinking...";
+    const loadingMessage = addMessage(
+      "SkillSpring is thinking...",
+      "assistant",
+    );
+    loadingMessage.classList.add("loading-message");
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message, history: conversationHistory }),
+      });
+      const result = await response.json();
+
+      loadingMessage.remove();
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "The AI assistant could not respond.");
+      }
+      conversationHistory.push({ role: "assistant", content: result.reply });
+      addMessage(result.reply, "assistant");
+    } catch (error) {
+      loadingMessage.remove();
+      conversationHistory.pop();
+      addMessage(
+        error.message || "Please check your connection and try again.",
+        "error",
+      );
+    } finally {
+      sendButton.disabled = false;
+      sendButton.textContent = "Send";
+      input.focus();
+    }
+  });
+});

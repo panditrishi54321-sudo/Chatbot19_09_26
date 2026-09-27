@@ -1,0 +1,68 @@
+{% extends "base.html" %} {% block title %}Student Data | SkillSpring{% endblock
+%} {% block content %}
+<section class="page-heading container">
+  <p class="eyebrow">Student management / 02</p>
+  <h1>Registered learners<span class="title-dot">.</span></h1>
+  <p>Recently registered learners, kept in one clear view.</p>
+</section>
+
+<section class="table-section container">
+  {% if students %}
+  <div class="data-summary">
+    <div>
+      <span class="summary-label">Community directory</span
+      ><strong>Registered Learners</strong>
+    </div>
+    <div class="learner-count">
+      <strong>{{ students|length }}</strong><span>total learners</span>
+    </div>
+    <a class="button button-primary" href="{{ url_for('data_entry') }}"
+      >Add learner <span aria-hidden="true">+</span></a
+    >
+  </div>
+  <div class="table-wrapper">
+    <table class="student-table">
+      <caption class="visually-hidden">
+        Registered SkillSpring students
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">ID</th>
+          <th scope="col">Name</th>
+          {% if is_admin %}
+          <th scope="col">Email</th>
+          <th scope="col">Phone</th>
+          {% endif %}
+          <th scope="col">Course</th>
+          <th scope="col">Skill Level</th>
+          <th scope="col">Created At</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for student in students %}
+        <tr>
+          <td>{{ student["id"] }}</td>
+          <td>{{ student["name"] }}</td>
+          {% if is_admin %}
+          <td>{{ student["email"] }}</td>
+          <td>{{ student["phone"] or "-" }}</td>
+          {% endif %}
+          <td>{{ student["course"] }}</td>
+          <td>{{ student["skill_level"] }}</td>
+          <td>{{ student["created_at"] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <h2>No students found yet.</h2>
+    <p>Register a student to see their details in this table.</p>
+    <a class="button button-primary" href="{{ url_for('data_entry') }}"
+      >Add a Student</a
+    >
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

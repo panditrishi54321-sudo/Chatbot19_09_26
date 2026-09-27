@@ -1,0 +1,274 @@
+{% extends "base.html" %} {% block title %}Learning Hub | SkillSpring{% endblock
+%} {% block content %}
+<div
+  class="learning-hub container"
+  id="learning-hub"
+  data-csrf-token="{{ csrf_token }}"
+>
+  <header class="hub-hero">
+    <div class="hub-hero-copy">
+      <p class="eyebrow">SkillSpring / Learning Journey</p>
+      <h1>Learning Hub<span class="title-dot">.</span></h1>
+      <p>
+        Master Generative AI &amp; Agentic AI, from foundations to production.
+      </p>
+    </div>
+    <div class="hub-progress" aria-live="polite">
+      <div class="hub-progress-heading">
+        <span>Learning progress</span>
+        <strong id="hub-progress-percent">0%</strong>
+      </div>
+      <progress
+        id="hub-progress-bar"
+        value="0"
+        max="100"
+        aria-label="Overall chapter progress"
+      >
+        0%
+      </progress>
+      <div class="hub-progress-meta">
+        <span id="hub-completion-count">0 / 15 chapters completed</span>
+        <span id="hub-resume-label">Ready when you are</span>
+      </div>
+      <button
+        class="button button-primary hub-resume"
+        id="hub-resume"
+        type="button"
+        hidden
+      >
+        Resume learning
+      </button>
+    </div>
+  </header>
+
+  <section class="hub-metrics" aria-label="Learning summary">
+    <div>
+      <span>Current chapter</span
+      ><strong id="hub-current-chapter">Not started</strong>
+    </div>
+    <div>
+      <span>Learning streak</span
+      ><strong><span id="hub-streak">0</span> days</strong>
+    </div>
+    <div>
+      <span>Projects completed</span
+      ><strong id="hub-project-count">0 / 10</strong>
+    </div>
+    <div>
+      <span>Recently viewed</span
+      ><strong id="hub-recent-chapter">None yet</strong>
+    </div>
+  </section>
+
+  <nav class="hub-tabs" aria-label="Learning Hub sections" role="tablist">
+    <button
+      type="button"
+      role="tab"
+      aria-selected="true"
+      data-hub-tab="journey"
+    >
+      Learning Journey
+    </button>
+    <button type="button" role="tab" aria-selected="false" data-hub-tab="notes">
+      My Weekly Notes
+    </button>
+    <button type="button" role="tab" aria-selected="false" data-hub-tab="labs">
+      Practical Labs
+    </button>
+  </nav>
+
+  <section class="hub-view" id="hub-view-journey" data-hub-view="journey">
+    <div class="hub-section-heading">
+      <div>
+        <p class="eyebrow">15 chapters / foundations to capstone</p>
+        <h2>Choose your next lesson</h2>
+      </div>
+      <a class="hub-inline-link" href="#hub-tutor-modes">Open AI Tutor tools</a>
+    </div>
+
+    <div class="hub-filters">
+      <label class="hub-search-field" for="hub-search"
+        >Search chapters, topics and code
+        <input
+          id="hub-search"
+          type="search"
+          placeholder="Try: attention, citations, tool calling..."
+          autocomplete="off"
+        />
+      </label>
+      <label for="hub-level-filter"
+        >Difficulty
+        <select id="hub-level-filter">
+          <option value="all">All levels</option>
+          <option value="Beginner">Beginner</option>
+          <option value="Intermediate">Intermediate</option>
+          <option value="Advanced">Advanced</option>
+        </select>
+      </label>
+      <label for="hub-topic-filter"
+        >Topic
+        <select id="hub-topic-filter">
+          <option value="all">All topics</option>
+          <option>GenAI</option>
+          <option>RAG</option>
+          <option>Agents</option>
+          <option>MCP</option>
+          <option>LLM</option>
+          <option>Projects</option>
+        </select>
+      </label>
+      <label class="hub-bookmarks-filter"
+        ><input id="hub-bookmarked-filter" type="checkbox" /> Bookmarked</label
+      >
+    </div>
+
+    <div class="hub-chapter-grid" id="hub-chapter-grid" aria-live="polite">
+      <p class="hub-loading">Loading your curriculum...</p>
+    </div>
+
+    <article class="hub-lesson" id="hub-lesson" hidden>
+      <div class="hub-lesson-topline">
+        <div id="hub-lesson-heading"></div>
+        <button
+          type="button"
+          class="hub-icon-button"
+          id="hub-bookmark-button"
+          aria-pressed="false"
+          title="Bookmark this chapter"
+        >
+          ☆ <span>Bookmark</span>
+        </button>
+      </div>
+      <div class="hub-lesson-content" id="hub-lesson-content"></div>
+    </article>
+  </section>
+
+  <section class="hub-view" id="hub-view-notes" data-hub-view="notes" hidden>
+    <div class="hub-section-heading">
+      <div>
+        <p class="eyebrow">Class journal / saved privately to this account</p>
+        <h2>My Weekly Notes</h2>
+      </div>
+      <span class="hub-note-status" id="hub-note-status" role="status"></span>
+    </div>
+    <div class="hub-notes-layout">
+      <aside class="hub-week-rail">
+        <label for="notes-week">Class week</label>
+        <select id="notes-week"></select>
+        <p>
+          Notes are saved in SkillSpring and remain separate from student
+          records.
+        </p>
+      </aside>
+      <form class="hub-note-form" id="hub-note-form">
+        <div class="hub-note-title-row">
+          <label for="note-title"
+            >Note title<input
+              id="note-title"
+              name="title"
+              maxlength="120"
+              placeholder="What did we cover?"
+          /></label>
+          <label for="note-date"
+            >Class date<input id="note-date" name="note_date" type="date"
+          /></label>
+        </div>
+        <label for="note-notes"
+          >Class notes<textarea
+            id="note-notes"
+            name="notes"
+            rows="5"
+            placeholder="Summarize the lesson in your own words..."
+          ></textarea>
+        </label>
+        <div class="hub-note-grid">
+          <label for="note-important"
+            >Important concepts<textarea
+              id="note-important"
+              name="important_points"
+              rows="3"
+            ></textarea>
+          </label>
+          <label for="note-doubts"
+            >Questions and doubts<textarea
+              id="note-doubts"
+              name="doubts"
+              rows="3"
+            ></textarea>
+          </label>
+          <label for="note-practical"
+            >Practical work completed<textarea
+              id="note-practical"
+              name="practical_work"
+              rows="3"
+            ></textarea>
+          </label>
+          <label for="note-revision"
+            >Things to revise<textarea
+              id="note-revision"
+              name="revision_points"
+              rows="3"
+            ></textarea>
+          </label>
+        </div>
+        <label for="note-goals"
+          >Next class goals<textarea
+            id="note-goals"
+            name="next_goals"
+            rows="3"
+          ></textarea>
+        </label>
+        <div class="hub-note-actions">
+          <button class="button button-primary" id="note-save" type="submit">
+            Save notes
+          </button>
+          <button class="button button-secondary" id="note-clear" type="button">
+            Clear editor
+          </button>
+          <button
+            class="button button-danger"
+            id="note-delete"
+            type="button"
+            hidden
+          >
+            Delete saved week
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <section class="hub-view" id="hub-view-labs" data-hub-view="labs" hidden>
+    <div class="hub-section-heading">
+      <div>
+        <p class="eyebrow">Build, test, reflect</p>
+        <h2>Practical Labs</h2>
+      </div>
+      <p>Ten small projects move from first prompts to a grounded AI tutor.</p>
+    </div>
+    <div class="hub-lab-grid" id="hub-lab-grid" aria-live="polite"></div>
+  </section>
+
+  <section class="hub-tutor-band" id="hub-tutor-modes">
+    <div>
+      <p class="eyebrow">SkillSpring AI Tutor</p>
+      <h2>Ask, practice, and prepare</h2>
+      <p>
+        Choose a chapter first to give the tutor focused context. Only that
+        chapter is added to its request.
+      </p>
+    </div>
+    <div class="hub-tutor-modes">
+      <button type="button" data-tutor-mode="teach">Teach Me</button>
+      <button type="button" data-tutor-mode="code">Show Me Code</button>
+      <button type="button" data-tutor-mode="simple">Explain Simply</button>
+      <button type="button" data-tutor-mode="quiz">Quiz Me</button>
+      <button type="button" data-tutor-mode="interview">Interview Mode</button>
+      <button type="button" data-tutor-mode="practice">Give Me Practice</button>
+      <button type="button" data-tutor-mode="debug">Debug My Code</button>
+    </div>
+  </section>
+</div>
+{% endblock %} {% block scripts %}
+<script src="{{ url_for('static', filename='js/learning_hub.js') }}"></script>
+{% endblock %}

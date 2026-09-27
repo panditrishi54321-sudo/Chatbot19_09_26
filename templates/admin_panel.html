@@ -1,0 +1,142 @@
+{% extends "base.html" %} {% block title %}Admin Panel | SkillSpring{% endblock
+%} {% block content %}
+<section class="page-heading container">
+  <p class="eyebrow">Admin dashboard / 01</p>
+  <h1>Admin Panel<span class="title-dot">.</span></h1>
+  <p>
+    Welcome, {{ admin_name }}. Here's a live view of the SkillSpring learner
+    community.
+  </p>
+</section>
+
+<section class="container admin-grid">
+  <div class="admin-card metric-card">
+    <span class="summary-label">Total students</span>
+    <strong>{{ student_count }}</strong>
+    <p>Registered learners across the platform.</p>
+  </div>
+
+  <div class="admin-card metric-card">
+    <span class="summary-label">Archived learners</span>
+    <strong>{{ deleted_student_count }}</strong>
+    <p>Soft-deleted records kept for review and recovery.</p>
+  </div>
+
+  <div class="admin-card metric-card">
+    <span class="summary-label">Available courses</span>
+    <strong>{{ total_courses }}</strong>
+    <p>Course offerings currently enabled.</p>
+  </div>
+
+  <div class="admin-card">
+    <span class="summary-label">Quick actions</span>
+    <div class="action-stack">
+      <a class="button button-primary" href="{{ url_for('admin_students') }}"
+        >Open management</a
+      >
+      <a class="button button-secondary" href="{{ url_for('admin_activity') }}"
+        >View activity</a
+      >
+      <a class="button button-secondary" href="{{ url_for('admin_export') }}"
+        >Export Excel</a
+      >
+    </div>
+  </div>
+</section>
+
+<section class="container dashboard-layout">
+  <div class="dashboard-panel">
+    <h2>Student counts by course</h2>
+    {% if course_counts %}
+    <ul class="stat-list">
+      {% for row in course_counts %}
+      <li>
+        <span>{{ row["course"] }}</span>
+        <strong>{{ row["total"] }}</strong>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="empty-copy">No student registrations yet.</p>
+    {% endif %}
+  </div>
+
+  <div class="dashboard-panel">
+    <h2>Student counts by skill level</h2>
+    {% if skill_level_counts %}
+    <ul class="stat-list">
+      {% for row in skill_level_counts %}
+      <li>
+        <span>{{ row["skill_level"] }}</span>
+        <strong>{{ row["total"] }}</strong>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="empty-copy">No skill-level data available.</p>
+    {% endif %}
+  </div>
+</section>
+
+<section class="container dashboard-panel recent-panel">
+  <h2>Recent student registrations</h2>
+  {% if recent_students %}
+  <div class="table-wrapper">
+    <table class="student-table compact-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Course</th>
+          <th>Skill Level</th>
+          <th>Registered</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for student in recent_students %}
+        <tr>
+          <td>{{ student["id"] }}</td>
+          <td>{{ student["name"] }}</td>
+          <td>{{ student["course"] }}</td>
+          <td>{{ student["skill_level"] }}</td>
+          <td>{{ student["created_at"] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty-copy">No recent student registrations found.</p>
+  {% endif %}
+</section>
+
+<section class="container dashboard-panel recent-panel">
+  <h2>Recent admin activity</h2>
+  {% if audit_logs %}
+  <div class="table-wrapper">
+    <table class="student-table compact-table">
+      <thead>
+        <tr>
+          <th>Action</th>
+          <th>Actor</th>
+          <th>Student</th>
+          <th>Recorded</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in audit_logs %}
+        <tr>
+          <td>{{ log["action"] }}</td>
+          <td>{{ log["actor_name"] or "System" }}</td>
+          <td>{{ log["student_id"] or "-" }}</td>
+          <td>{{ log["created_at"] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty-copy">No admin activity has been recorded yet.</p>
+  {% endif %}
+</section>
+{% endblock %}

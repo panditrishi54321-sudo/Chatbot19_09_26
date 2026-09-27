@@ -1,0 +1,108 @@
+{% extends "base.html" %} {% block title %}Student Data Entry | SkillSpring{%
+endblock %} {% block content %}
+<section class="page-heading container">
+  <p class="eyebrow">Student management / 01</p>
+  <h1>
+    Join the SkillSpring learning community<span class="title-dot">.</span>
+  </h1>
+  <p>
+    Add a learner to the SkillSpring student directory and keep their learning
+    path organized.
+  </p>
+</section>
+
+<section class="form-section container">
+  <div class="form-intro">
+    <span class="form-intro-mark">SS</span>
+    <div>
+      <strong>New learner profile</strong>
+      <p>
+        All fields marked with <span aria-hidden="true">*</span> are required.
+      </p>
+    </div>
+  </div>
+  <form class="student-form" method="POST" action="{{ url_for('data_entry') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <div class="form-grid">
+      <div class="form-field">
+        <label for="name">Student Name <span aria-hidden="true">*</span></label>
+        <input
+          id="name"
+          name="name"
+          type="text"
+          placeholder="e.g. Rishi Pandit"
+          value="{{ form_data.name }}"
+          required
+        />
+      </div>
+
+      <div class="form-field">
+        <label for="email">Email <span aria-hidden="true">*</span></label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          placeholder="e.g. rishi@example.com"
+          value="{{ form_data.email }}"
+          required
+        />
+      </div>
+
+      <div class="form-field">
+        <label for="phone">Phone</label>
+        <input
+          id="phone"
+          name="phone"
+          type="tel"
+          placeholder="e.g. 9999999999"
+          value="{{ form_data.phone }}"
+        />
+      </div>
+
+      <div class="form-field">
+        <label for="course">Course <span aria-hidden="true">*</span></label>
+        <select
+          id="course"
+          name="course"
+          data-selected="{{ form_data.course }}"
+          required
+        >
+          <option value="">Choose a course</option>
+          {% for course in courses %}
+          <option value="{{ course }}">{{ course }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label for="skill_level"
+          >Skill Level <span aria-hidden="true">*</span></label
+        >
+        <select
+          id="skill_level"
+          name="skill_level"
+          data-selected="{{ form_data.skill_level }}"
+          required
+        >
+          <option value="">Choose a skill level</option>
+          {% for level in skill_levels %}
+          <option value="{{ level }}">{{ level }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <p class="required-note">
+      <span aria-hidden="true">*</span> Required fields
+    </p>
+    <div class="form-actions">
+      <button class="button button-primary" type="submit">
+        Register Student
+      </button>
+      <button class="button button-secondary" type="reset">Clear Form</button>
+    </div>
+  </form>
+</section>
+{% endblock %} {% block scripts %}
+<script src="{{ url_for('static', filename='js/form.js') }}"></script>
+{% endblock %}

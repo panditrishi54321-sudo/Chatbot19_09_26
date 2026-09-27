@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Edit Student | SkillSpring{% endblock %}
+{% block content %}
+<section class="page-heading container">
+  <p class="eyebrow">Admin management / 03</p>
+  <h1>Edit student<span class="title-dot">.</span></h1>
+  <p>Update the selected learner record while keeping the information valid and secure.</p>
+</section>
+
+<section class="container form-section">
+  <form method="post" action="{{ url_for('admin_edit_student', student_id=student['id']) }}" class="student-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <div class="form-grid">
+      <div class="form-field">
+        <label for="name">Name <span>*</span></label>
+        <input id="name" name="name" type="text" value="{{ student['name'] }}" required />
+      </div>
+
+      <div class="form-field">
+        <label for="email">Email <span>*</span></label>
+        <input id="email" name="email" type="email" value="{{ student['email'] }}" required />
+      </div>
+
+      <div class="form-field">
+        <label for="phone">Phone</label>
+        <input id="phone" name="phone" type="text" value="{{ student['phone'] or '' }}" />
+      </div>
+
+      <div class="form-field">
+        <label for="course">Course <span>*</span></label>
+        <select id="course" name="course" required>
+          {% for course in courses %}
+          <option value="{{ course }}" {% if student['course'] == course %}selected{% endif %}>{{ course }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label for="skill_level">Skill Level <span>*</span></label>
+        <select id="skill_level" name="skill_level" required>
+          {% for skill in skill_levels %}
+          <option value="{{ skill }}" {% if student['skill_level'] == skill %}selected{% endif %}>{{ skill }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="form-actions" style="margin-top: 24px;">
+      <button class="button button-primary" type="submit">Save changes</button>
+      <a class="button button-secondary" href="{{ url_for('admin_students') }}">Cancel</a>
+    </div>
+  </form>
+</section>
+{% endblock %}
